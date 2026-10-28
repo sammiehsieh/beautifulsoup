@@ -1,10 +1,7 @@
-from typing import Optional
-
-
 class SoupReplacer:
     """
-    Replaces every tag named og_tag with alt_tag while the tree is
-    being built, so no second pass over the tree is needed.
+    Replaces every tag named og_tag with alt_tag while the tree is being built,
+    so no second pass over the tree is needed.
     """
 
     def __init__(self, og_tag: str, alt_tag: str):
