@@ -122,3 +122,6 @@ dmypy.json
 # Emacs files
 *~
 \#*\#
+
+test_files/
+out*.txt

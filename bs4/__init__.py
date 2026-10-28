@@ -36,12 +36,10 @@ __all__ = [
     "UnicodeDammit",
     "CData",
     "Doctype",
-
     # Exceptions
     "FeatureNotFound",
     "ParserRejectedMarkup",
     "StopParsing",
-
     # Warnings
     "AttributeResemblesVariableWarning",
     "GuessedAtParserWarning",
@@ -129,6 +127,8 @@ from bs4._warnings import (
     XMLParsedAsHTMLWarning,
 )
 
+from .replacer import SoupReplacer
+
 
 class BeautifulSoup(Tag):
     """A data structure representing a parsed HTML or XML document.
@@ -215,6 +215,7 @@ class BeautifulSoup(Tag):
         from_encoding: Optional[_Encoding] = None,
         exclude_encodings: Optional[_Encodings] = None,
         element_classes: Optional[Dict[Type[PageElement], Type[PageElement]]] = None,
+        replacer: Optional[SoupReplacer] = None,
         **kwargs: Any,
     ):
         """Constructor.
@@ -435,6 +436,7 @@ class BeautifulSoup(Tag):
         self.known_xml = self.is_xml
         self._namespaces = dict()
         self.parse_only = parse_only
+        self.replacer = replacer
 
         if hasattr(markup, "read"):  # It's a file-type object.
             markup = markup.read()
@@ -1025,6 +1027,9 @@ class BeautifulSoup(Tag):
         ):
             return None
 
+        if self.replacer:
+            name = self.replacer.replace(name)
+
         tag_class = self.element_classes.get(Tag, Tag)
         # Assume that this is either Tag or a subclass of Tag. If not,
         # the user brought type-unsafety upon themselves.
@@ -1060,6 +1065,8 @@ class BeautifulSoup(Tag):
         """
         # print("End tag: " + name)
         self.endData()
+        if self.replacer:
+            name = self.replacer.replace(name)
         self._popToTag(name, nsprefix)
 
     def handle_data(self, data: str) -> None:
