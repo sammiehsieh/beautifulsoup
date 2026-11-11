@@ -437,6 +437,7 @@ class BeautifulSoup(Tag):
         self._namespaces = dict()
         self.parse_only = parse_only
         self.replacer = replacer
+        self._renamed = []
 
         if hasattr(markup, "read"):  # It's a file-type object.
             markup = markup.read()
@@ -1027,9 +1028,7 @@ class BeautifulSoup(Tag):
         ):
             return None
 
-        if self.replacer:
-            name = self.replacer.replace(name)
-
+        old_name = name
         tag_class = self.element_classes.get(Tag, Tag)
         # Assume that this is either Tag or a subclass of Tag. If not,
         # the user brought type-unsafety upon themselves.
@@ -1049,6 +1048,9 @@ class BeautifulSoup(Tag):
         )
         if tag is None:
             return tag
+        if self.replacer:
+            self.replacer.apply(tag)
+            self._renamed.append((old_name, tag.name))
         if self._most_recent_element is not None:
             self._most_recent_element.next_element = tag
         self._most_recent_element = tag
@@ -1066,7 +1068,10 @@ class BeautifulSoup(Tag):
         # print("End tag: " + name)
         self.endData()
         if self.replacer:
-            name = self.replacer.replace(name)
+            for i in range(len(self._renamed) - 1, -1, -1):
+                if self._renamed[i][0] == name:
+                    name = self._renamed.pop(i)[1]
+                    break
         self._popToTag(name, nsprefix)
 
     def handle_data(self, data: str) -> None:
