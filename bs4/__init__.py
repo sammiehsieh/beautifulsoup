@@ -1082,6 +1082,16 @@ class BeautifulSoup(Tag):
         """
         self.current_data.append(data)
 
+    def __iter__(self) -> Iterator[PageElement]:
+        """Iterate over every node in the document, in document order,
+        one at a time. No list of nodes is built."""
+        if not self.contents:
+            return
+        node: Optional[PageElement] = self.contents[0]
+        while node is not None:
+            yield node
+            node = node.next_element
+
     def decode(
         self,
         indent_level: Optional[int] = None,
